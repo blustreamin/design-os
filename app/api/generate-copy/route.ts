@@ -47,19 +47,23 @@ Respond ONLY with this JSON:
       : [{ role: 'user', content: userPrompt }]
 
     const message = await client.messages.create({
-      model: 'claude-opus-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 600,
       system: systemPrompt,
       messages,
     })
 
-    const text = (message.content[0] as { type: string; text: string }).text
-    const clean = text.replace(/```json|```/g, '').trim()
+    const textBlock = message.content.find((b) => b.type === 'text')
+    if (!textBlock || textBlock.type !== 'text') {
+      throw new Error('Claude returned no text block')
+    }
+    const clean = textBlock.text.replace(/```json|```/g, '').trim()
     const parsed = JSON.parse(clean)
 
     return NextResponse.json(parsed)
-  } catch (e) {
-    console.error(e)
-    return NextResponse.json({ error: 'Generation failed' }, { status: 500 })
+  } catch (e: any) {
+    console.error('generate-copy error:', e)
+    const message = e?.message || 'Unknown error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
