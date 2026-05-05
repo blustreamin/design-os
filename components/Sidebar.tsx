@@ -124,9 +124,9 @@ export default function Sidebar({ onGenerate, isLoading, setIsLoading, onSelectH
 
       onGenerate(result)
       setHistoryLoaded(false) // force refresh
-    } catch (e) {
+    } catch (e: any) {
       console.error(e)
-      alert('Generation failed — check your API key in Vercel env vars')
+      alert(`Generation failed: ${e?.message || 'unknown error'}`)
     } finally {
       setIsLoading(false)
     }
